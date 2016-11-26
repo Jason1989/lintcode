@@ -1,0 +1,87 @@
+Question: Find K-th largest element in N arrays.
+
+Example:
+In n=2 arrays [[9,3,2,4,7],[1,2,3,4,8]], the 3rd largest element is 7.
+
+In n=2 arrays [[9,3,2,4,7],[1,2,3,4,8]], the 1st largest element is 9, 2nd largest element is 8, 3rd largest element is 7 and etc.
+
+解题思路：
+
+首先还是会考虑到用最大堆或最小堆，如果简单的将所有的元素push入堆的话，可以用最小堆，然后维护最小堆的长度为k，当遍历数组结束后，peek element即为要找的元素。
+
+public class Solution {
+    /**
+     * @param arrays a list of array
+     * @param k an integer
+     * @return an integer, K-th largest element in N arrays
+     */
+    public int KthInArrays(int[][] arrays, int k) {
+        if(arrays == null || arrays.length == 0) return 0;
+        PriorityQueue<Integer> minheap = new PriorityQueue<>(k, new Comparator<Integer>(){
+            @Override
+            public int compare(Integer i1, Integer i2){
+                return i1 - i2;
+            }
+        });
+        for(int[] arr : arrays){
+            for(int i : arr){
+                minheap.add(i);
+                if(maxheap.size() > k){
+                    minheap.poll();
+                }
+            }
+        }
+        return minheap.peek();
+    }
+}
+
+优化：
+
+考虑到可能会有大量的元素，所以将全部N个数组全部遍历也不现实。参考九章做法，解题思路与Kth Smallest Number in Sorted Matrix类似，也是创建一个Point类，将N个数组分别排序后，将最后一个元素组装成Point然后push入最大堆。
+之后进行k-1次操作，每次将peekelement poll出来，再根据Point信息找到对应的数组，并将其前一个元素push入堆，到第n-1次操作时，peekelement就是要找的元素。
+
+public class Solution {
+    /**
+     * @param arrays a list of array
+     * @param k an integer
+     * @return an integer, K-th largest element in N arrays
+     */
+    public int KthInArrays(int[][] arrays, int k) {
+        if(arrays == null || arrays.length == 0) return 0;
+        PriorityQueue<Point> maxheap = new PriorityQueue<>(k, new PointComparator());
+        for(int i = 0; i < arrays.length; i++){
+            int[]arr = arrays[i];
+            Arrays.sort(arr);
+            int m = arr.length;
+            if(m == 0) continue;
+            Point p = new Point(i, m - 1, arr[m - 1]);
+            maxheap.add(p);
+        }
+        for(int i = 0; i < k -1; i++){
+            Point p = maxheap.poll();
+            int arr_index = p.arr_index;
+            int index = p.index;
+            if(index <= 0) continue;
+            int val = arrays[arr_index][index - 1];
+            maxheap.add(new Point(arr_index, index - 1, val));
+        }
+        return maxheap.peek().val;
+    }
+}
+
+class Point{
+    int arr_index;
+    int index;
+    int val;
+    public Point(int arr_index, int index, int val){
+        this.arr_index = arr_index;
+        this.index = index;
+        this.val = val;
+    }
+}
+
+class PointComparator implements Comparator<Point>{
+    public int compare(Point p1, Point p2){
+        return p2.val - p1.val;
+    }
+}
