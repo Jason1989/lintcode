@@ -1,0 +1,62 @@
+Question:Given two integer arrays sorted in ascending order and an integer k. Define sum = a + b, where a is an element from the first array and b is an element from the second one. Find the kth smallest sum out of all possible sums.
+
+Example
+Given [1, 7, 11] and [2, 4, 6].
+For k = 3, return 7.
+For k = 4, return 9.
+For k = 8, return 15.
+
+解题思路：
+
+依然是采用最小堆 BFS的方式，创建Point的类，同时维护visited数组，确保不会重复遍历相同元素。
+
+public class Solution {
+    /**
+     * @param A an integer arrays sorted in ascending order
+     * @param B an integer arrays sorted in ascending order
+     * @param k an integer
+     * @return an integer
+     */
+    public int kthSmallestSum(int[] A, int[] B, int k) {
+        // Write your code here
+        if(A == null || B == null) return 0;
+        PriorityQueue<Point> minheap = new PriorityQueue<Point>(k, new PointComparator());
+        Point p = new Point(0, 0, A[0] + B[0]);
+        int a = A.length, b = B.length;
+        boolean[][]visited = new boolean[a][b];
+        minheap.add(p);
+        for(int i = 0; i < k - 1; i++){
+            Point cur = minheap.poll();
+            int index_a = cur.index_a;
+            int index_b = cur.index_b;
+            if(index_a < a - 1 && !visited[index_a + 1][index_b]){
+                Point tmp = new Point(index_a + 1, index_b, A[index_a + 1] + B[index_b]);
+                minheap.add(tmp);
+                visited[index_a + 1][index_b] = true;
+            }
+            if(index_b < b - 1 &&!visited[index_a][index_b + 1]){
+                Point tmp = new Point(index_a, index_b + 1, A[index_a] + B[index_b + 1]);
+                minheap.add(tmp);
+                visited[index_a][index_b + 1] = true;
+            }
+        }
+        return minheap.peek().val;
+    }
+}
+
+class Point{
+    int index_a;
+    int index_b;
+    int val;
+    public Point(int index_a, int index_b, int val){
+        this.index_a = index_a;
+        this.index_b = index_b;
+        this.val = val;
+    }
+}
+
+class PointComparator implements Comparator<Point>{
+    public int compare(Point p1, Point p2){
+        return p1.val - p2.val;
+    }
+}

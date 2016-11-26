@@ -1,0 +1,63 @@
+Question: Find the kth smallest number in at row and column sorted matrix.
+
+Example
+Given k = 4 and a matrix:
+
+[
+  [1 ,5 ,7],
+  [3 ,7 ,8],
+  [4 ,8 ,9],
+]
+
+return 5
+
+解题思路：
+
+1.最开始想到的是用最大堆，将数组元素push到堆里，维护堆的长度k,当遍历数组结束时，peek element就是要找的第k个元素，执行到91%时出现超时。
+
+2.参考九章答案，代码的逻辑是采用最小堆，创建一个Point的类，从左上角开始，将Points push入最小堆，然后执行k-1次poll操作，同时每次将poll出来的Point的对应的下方和右方的points push入堆，这样保证了在执行k-1次poll操作后，堆顶就是要找的point。从逻辑上看来是采用了BFS的方式进行遍历，同时注意维护一个visited的二维数组，保证point不会重复遍历。
+
+代码如下：
+
+public class Solution {
+
+    public int kthSmallest(int[][] matrix, int k) {
+        PriorityQueue<Point> minheap = new PriorityQueue<Point>(k, new PointComparator());
+        int m = matrix.length, n = matrix[0].length;
+        boolean[][]visited = new boolean[m][n];
+        minheap.add(new Point(0, 0, matrix[0][0]));
+        visited[0][0] = true;
+        for(int i = 0; i < k - 1; i++){
+            Point cur = minheap.poll();
+            int x = cur.x, y = cur.y;
+            if(x + 1 < m && !visited[x + 1][y]){
+                Point down = new Point(cur.x + 1, y, matrix[x + 1][y]);
+                visited[x + 1][y] = true;
+                minheap.add(down);
+            }
+            if(y + 1 < n && !visited[x][y + 1]){
+                Point right = new Point(cur.x, y + 1, matrix[x][y + 1]);
+                visited[x][y + 1] = true;
+                minheap.add(right);
+            }
+        }
+        return minheap.poll().val;
+    }
+}
+
+class Point{
+    int x;
+    int y;
+    int val;
+    public Point(int x, int y, int val){
+        this.x = x;
+        this.y = y;
+        this.val = val;
+    }
+}
+
+class PointComparator implements Comparator<Point>{
+    public int compare(Point a, Point b){
+        return a.val - b.val;
+    }
+}
