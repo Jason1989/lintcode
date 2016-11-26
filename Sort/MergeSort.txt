@@ -1,1 +1,41 @@
+public class Solution{
 
+	public void sortArray(int[] nums){
+		int[]tmp = new int[nums.length];
+		mergeSort(nums, 0, nums.length - 1, tmp);
+	}
+	
+	public void mergeSort(int[]nums, int start, int end, int[] tmp){
+		if(start >= end) return;
+		
+		int left = start, right = end;
+		int mid = (right - left) / 2 + left;
+		
+		mergeSort(nums, start, mid, tmp);
+		mergeSort(nums, mid + 1, end, tmp);
+		merge(nums, start, mid, end, tmp);
+	}
+	
+	public void merge(int[]nums, int start, int mid, int end, int[]tmp){
+		int left = start, right = mid + 1;
+		int index = start;
+		
+		while(left <= mid && right <= end){
+			if(nums[left] < nums[right]){
+				tmp[index++] = nums[left++];
+			}else{
+				tmp[index++] = nums[right++];
+			}
+		}
+		while(left <= mid){
+			tmp[index++] = nums[left++];
+		}
+		while(right <= end){
+			tmp[index++] = nums[right++];
+		}
+		
+		for(index = start; index <= end; index++){
+			nums[index] = tmp[index];
+		}
+	}
+}
