@@ -3,7 +3,7 @@ Question: Given n non-negative integers representing an elevation map where the 
 Example
 Given [0,1,0,2,1,0,1,3,2,1,2,1], return 6.
 
-解题思路：该题是典型的灌水问题，灌水问题，一般都是左右两边往里夹，由高度低的一方往里移动。
+解题思路：该题是典型的灌水问题，采用Two Pointer，一般都是左右两边往里夹，由高度低的一方往里移动，同时不断维护当前的最高值。
 
 public class Solution {
     /**
