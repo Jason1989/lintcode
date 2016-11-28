@@ -1,0 +1,93 @@
+Question: Given n x m non-negative integers representing an elevation map 2d where the area of each cell is 1 x 1, compute how much water it is able to trap after raining.
+
+Example
+Given 5*4 matrix
+
+[12,13,0,12]
+[13,4,13,12]
+[13,8,10,12]
+[12,13,12,12]
+[13,13,13,13]
+return 14.
+
+解题思路： 作为灌水问题，将一维数组变成二维数组，但是仍有一点是保持一致的，还是由高度最低的一根柱子决定灌水的多少。 将二维数组看作立方体进行遍历的话，
+则应从外向内进行遍历，由最外层的最低的柱子开始遍历，遍历上下左右四根柱子，在遍历了当前柱子的四周后，由已经遍历之中的高度次低的柱子进行遍历，因为在这里
+考虑到用最小堆，创建Point的类（横纵坐标以及高度），首先将最外围的points压入堆中，不断遍历高度最小的point，同时不断维护当前的point与其周围四个点的高度
+差，直到堆变空。
+
+public class Solution {
+    /**
+     * @param heights: a matrix of integers
+     * @return: an integer
+     */
+    public int trapRainWater(int[][] heights) {
+        if(heights == null || heights.length == 0) return 0;
+        int m = heights.length, n = heights[0].length;
+        boolean[][]visited = new boolean[m][n];
+        PriorityQueue<Point> heap = new PriorityQueue<Point>(m * n, new PointComparator());
+        for(int i = 0; i < m; i++){
+            heap.add(new Point(i, 0, heights[i][0]));
+            heap.add(new Point(i, n - 1, heights[i][n - 1]));
+            visited[i][0] = true;
+            visited[i][n - 1] = true;
+        }
+        for(int i = 0; i < n; i++){
+            heap.add(new Point(0, i, heights[0][i]));
+            heap.add(new Point(m - 1, i, heights[m - 1][i]));
+            visited[0][i] = true;
+            visited[m - 1][i] = true;
+        }
+        int res = 0;
+        while(!heap.isEmpty()){
+            Point p = heap.poll();
+            int x = p.x, y = p.y;
+            //up
+            if(x > 0 && !visited[x - 1][y]){
+                visited[x - 1][y] = true;
+                res += Math.max(0, p.height - heights[x - 1][y]);
+                heap.add(new Point(x - 1, y, Math.max(heights[x - 1][y], p.height)));
+            }
+            //down
+            if(x < m - 1 && !visited[x + 1][y]){
+                visited[x + 1][y] = true;
+                res += Math.max(0, p.height - heights[x + 1][y]);
+                heap.add(new Point(x + 1, y, Math.max(heights[x + 1][y], p.height)));
+            }
+            //left
+            if(y > 0 && !visited[x][y - 1]){
+                visited[x][y - 1] = true;
+                res += Math.max(0, p.height - heights[x][y - 1]);
+                heap.add(new Point(x, y - 1, Math.max(heights[x][y - 1], p.height)));
+            }
+            //right
+            if(y < n - 1 && !visited[x][y + 1]){
+                visited[x][y + 1] = true;
+                res += Math.max(0, p.height - heights[x][y + 1]);
+                heap.add(new Point(x, y + 1, Math.max(heights[x][y + 1], p.height)));
+            }
+        }
+        return res;
+    }
+}
+
+
+class Point{
+    int x;
+    int y;
+    int height;
+    
+    Point(int x, int y, int height){
+        this.x = x;
+        this.y = y;
+        this.height = height;
+    }
+}
+
+class PointComparator implements Comparator<Point>{
+    
+    public int compare(Point p1, Point p2){
+        return p1.height - p2.height;
+    }
+    
+} 
+
