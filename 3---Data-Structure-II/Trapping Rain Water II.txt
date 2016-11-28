@@ -91,3 +91,7 @@ class PointComparator implements Comparator<Point>{
     
 } 
 
+时间复杂度为 O(2m + 2n + m * n * log(m + n))
+2m + 2n是最开始遍历的第一行最后一行第一列最后一列
+总体遍历m * n个元素，每次向堆中add元素复杂度为log(m + n)
+堆中的元素最多为2n + 2m 即add的复杂度为log(2m + 2n)
