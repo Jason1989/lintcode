@@ -81,4 +81,4 @@ class TrieNode{
     }
 }
 
-时间复杂度: O(m * n * 4 ^ len)
+时间复杂度: O(m * n * k * 4 ^ len) m n为matrix的高和宽，k为字典中单词的个数，len为字典的平均长度
