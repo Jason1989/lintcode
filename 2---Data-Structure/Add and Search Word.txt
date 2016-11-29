@@ -1,0 +1,79 @@
+Question: Design a data structure that supports the following two operations: addWord(word) and search(word)
+
+search(word) can search a literal word or a regular expression string containing only letters a-z or ..
+
+A . means it can represent any one letter.
+
+ Notice
+
+You may assume that all words are consist of lowercase letters a-z.
+
+Example
+addWord("bad")
+addWord("dad")
+addWord("mad")
+search("pad")  // return false
+search("bad")  // return true
+search(".ad")  // return true
+search("b..")  // return true
+
+解题思路：读题后可以发现该题是常规的前缀树的形式，需要实现TrieNode的数据结构，不过需要注意的是.的存在，因为.可以代表任何一个字符，所以需要跳过该字符，
+继续遍历，所以此处需要一个helper，去记录当前查找的字符的索引。
+
+public class WordDictionary {
+    
+    private TrieNode root = new TrieNode();
+
+    // Adds a word into the data structure.
+    public void addWord(String word) {
+        // Write your code here
+        char[] arr = word.toCharArray();
+        TrieNode cur = root;
+        for(char c : arr){
+            if(cur.children[c - 'a'] == null){
+                cur.children[c - 'a'] = new TrieNode();
+            }
+            cur = cur.children[c - 'a'];
+        }
+        cur.isWord = true;
+    }
+
+    // Returns if the word is in the data structure. A word could
+    // contain the dot character '.' to represent any one letter.
+    public boolean search(String word) {
+        // Write your code here
+        return search(root, 0, word.toCharArray());
+    }
+    
+    public boolean search(TrieNode node, int index, char[] arr){
+        if(node == null || index > arr.length){
+            return false;
+        } 
+        if(index == arr.length){
+            return node.isWord;
+        }
+        char c = arr[index];
+        if(c == '.'){
+            for(int i = 0; i < 26; i++){
+                if(search(node.children[i], index + 1, arr)){
+                    return true;
+                }
+            }
+            return false;
+        }else{
+            return search(node.children[c - 'a'], index + 1, arr);
+        }
+    }
+}
+
+class TrieNode{
+    TrieNode[] children;
+    boolean isWord;
+    
+    TrieNode(){
+        children = new TrieNode[26];
+    }
+}
+
+时间复杂度： O(n * len)
+n是表示需要查找的单词的个数, len是这n个单词的平均长度
