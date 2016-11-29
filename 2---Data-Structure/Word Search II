@@ -1,0 +1,84 @@
+Question: Given a matrix of lower alphabets and a dictionary. Find all words in the dictionary that can be found in the matrix. 
+A word can start from any position in the matrix and go left/right/up/down to the adjacent position. 
+
+Example
+Given matrix:
+doaf
+agai
+dcan
+and dictionary:
+{"dog", "dad", "dgdg", "can", "again"}
+
+return {"dog", "dad", "can", "again"}
+
+解题思路： 本题为Word Search的变种，Word Search是在matrix中找是否有指定的单词存在，本题是给定一组单词作为词典，查找在matrix中是否有字典单词的存在。
+最直接的办法是遍历字典数组，对每个一个单词从matrix进行一遍dfs，看是否在matrix中存在，存在即加入res中返回。如果字典中的单词都各自独立，没有重叠，那
+该办法也是速度最快的办法，但是如果字典树中存在hot, hotdot, hotty该类的字典，那对每个单词进行遍历就有一些浪费时间，因为他们有共同的前缀，所以可以采用
+字典树的办法，每当找到一个单词时，将该单词从字典树中删去。通过将字符改为*的形式可以节约空间，不需要visited二维数组控制字符的重复使用。
+
+public class Solution {
+    /**
+     * @param board: A list of lists of character
+     * @param words: A list of string
+     * @return: A list of string
+     */
+    
+    TrieNode root = new TrieNode(); 
+     
+    public ArrayList<String> wordSearchII(char[][] board, ArrayList<String> words) {
+        // write your code here
+        buildTrie(words);
+        ArrayList<String> res = new ArrayList<>();
+        int m = board.length, n = board[0].length;
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                dfs(board, i, j, res, root);
+            }
+        }
+        return res;
+    }
+    
+    public void dfs(char[][] board, int i, int j, ArrayList<String> res, TrieNode node){
+        char c = board[i][j];
+        if(c == '*' || node.children[c - 'a'] == null){
+            return;
+        }
+        node = node.children[c - 'a'];
+        if(node.word != null){
+            res.add(node.word);
+            node.word = null;
+        }
+        board[i][j] = '*';
+        if(i > 0) dfs(board, i - 1, j, res, node);
+        if(i < board.length - 1) dfs(board, i + 1, j, res, node);
+        if(j > 0) dfs(board, i, j - 1, res, node);
+        if(j < board[0].length - 1) dfs(board, i, j + 1, res, node);
+        board[i][j] = c;
+    }
+    
+    public void buildTrie(ArrayList<String> words){
+        for(String word : words){
+            char[]arr = word.toCharArray();
+            TrieNode cur = root;
+            for(char c : arr){
+                if(cur.children[c - 'a'] == null){
+                    cur.children[c - 'a'] = new TrieNode();
+                }
+                cur = cur.children[c - 'a'];
+            }
+            cur.word = word;
+        }
+    }
+    
+    
+}
+
+class TrieNode{
+    TrieNode[] children;
+    String word;
+    TrieNode(){
+        children = new TrieNode[26];
+    }
+}
+
+时间复杂度: O(m * n * 4 ^ len)
