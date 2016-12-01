@@ -1,0 +1,55 @@
+Question: Given n nodes labeled from 0 to n - 1 and a list of undirected edges (each edge is a pair of nodes), 
+write a function to check whether these edges make up a valid tree.
+
+Example
+Given n = 5 and edges = [[0, 1], [0, 2], [0, 3], [1, 4]], return true.
+
+Given n = 5 and edges = [[0, 1], [1, 2], [2, 3], [1, 3], [1, 4]], return false.
+
+解题思路：个人感觉本题的关键在于读懂题目的意思。如果将将0 1 2 3 4五个数字组成一棵valid tree的话，实际是需要保证每两个节点之间有一个链接存在，
+而且不允许环的存在。因为每两个节点之间有一个链接存在，那5个节点就只允许4个链接的存在，因此上来可以拿n和链接数目进行比较，然后判断环的存在，
+可以采用union find，在链接之前看两个节点是否已经相连。
+
+public class Solution {
+    
+    int[]id; 
+     
+    public boolean validTree(int n, int[][] edges) {
+        initId(n);
+        if(edges.length != n - 1) return false;
+        for(int[] edge : edges){
+            if(connected(edge[0], edge[1])){
+                return false;
+            }else{
+                union(edge[0], edge[1]);
+            }
+        }
+        return true;
+    }
+    
+    public void initId(int n){
+        id = new int[n];
+        for(int i = 0; i < n; i++){
+            id[i] = i;
+        }
+    }
+    
+    public int root(int i){
+        while(i != id[i]){
+            i = id[i];
+        }
+        return i;
+    }
+    
+    public void union(int a, int b){
+        int roota = root(a);
+        int rootb = root(b);
+        if(roota != rootb){
+            id[roota] = rootb;
+        }
+    }
+    
+    public boolean connected(int a, int b){
+        return root(a) == root(b);
+    }
+}
