@@ -1,0 +1,52 @@
+Question: Given n nodes in a graph labeled from 1 to n. There is no edges in the graph at beginning.
+
+You need to support the following method:
+1. connect(a, b), an edge to connect node a and node b
+2. query(), Returns the number of connected component in the graph
+
+Example
+5 // n = 5
+query() return 5
+connect(1, 2)
+query() return 4
+connect(2, 4)
+query() return 3
+connect(1, 4)
+query() return 3
+
+解题思路： 典型的Union Find题目，解题的关键是在于找出规律，此处的query是找出connect操作后，相互独立的树的个数。 可以考虑到每进行一次connect操作，
+如果两个树之前是不相连的，那独立树的数目减1，如果两个树已经相连了，独立树的数目不变。
+
+public class ConnectingGraph3 {
+    
+    int[] id;
+    int res = 0;
+
+    public ConnectingGraph3(int n) {
+        id = new int[n + 1];
+        for(int i = 1; i <= n; i++){
+            id[i] = i;
+        }
+        res = n;
+    }
+
+    public void connect(int a, int b) {
+        int roota = root(a);
+        int rootb = root(b);
+        if(roota != rootb){
+            id[roota] = rootb;
+            res--;
+        }
+    }
+        
+    public int query() {
+        return res;
+    }
+    
+    public int root(int i){
+        while(i != id[i]){
+            i = id[i];
+        }
+        return i;
+    }
+}
