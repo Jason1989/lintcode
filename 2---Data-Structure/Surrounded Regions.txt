@@ -1,0 +1,61 @@
+Question:Given a 2D board containing 'X' and 'O', capture all regions surrounded by 'X'.
+
+A region is captured by flipping all 'O''s into 'X''s in that surrounded region.
+
+Example
+X X X X
+X O O X
+X X O X
+X O X X
+After capture all regions surrounded by 'X', the board should be:
+
+X X X X
+X X X X
+X X X X
+X O X X
+
+解题思路: 这个题可以看作是一个带孔木板，从四边向里灌水，如果孔是相连的，那谁可以从最外层的孔灌入，如果孔被木板隔离开，那最后这个孔也没法灌入水。
+放在题目中可以从最外围的O下手，将与之相连的O标记出来，然后改成×，标记完成之后，将剩余的O改为X,再将× 改为O即可。
+
+public class Solution {
+    /**
+     * @param board a 2D board containing 'X' and 'O'
+     * @return void
+     */
+    public void surroundedRegions(char[][] board) {
+        if(board == null || board.length == 0) return;
+        int m = board.length, n = board[0].length;
+        for(int i = 0; i < m; i++){
+            dfs(board, i, 0);
+            dfs(board, i, n - 1);
+        }
+        for(int i = 0; i < n; i++){
+            dfs(board, 0, i);
+            dfs(board, m - 1, i);
+        }
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                if(board[i][j] == 'O')
+                    board[i][j] = 'X';
+            }
+        }
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                if(board[i][j] == '*')
+                    board[i][j] = 'O';
+            }
+        }
+    }
+    
+    public void dfs(char[][] board, int i, int j){
+        if(board[i][j] == 'O'){
+            board[i][j] = '*';
+            if(i > 0) dfs(board, i - 1, j);
+            if(i < board.length - 1) dfs(board, i + 1, j);
+            if(j > 0) dfs(board, i, j - 1);
+            if(j < board[0].length - 1) dfs(board, i, j + 1);
+        }
+    }
+}
+
+时间复杂度:最开是的dfs会遍历matrix一遍，之后将O改成X还有×变为O都会遍历matrix一遍，所以时间复杂度为O(3 * m * n)也就是O(mn)
