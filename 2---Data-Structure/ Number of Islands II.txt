@@ -1,0 +1,79 @@
+Question: Given a n,m which means the row and column of the 2D matrix and an array of pair A( size k). 
+Originally, the 2D matrix is all 0 which means there is only sea in the matrix. 
+The list pair has k operator and each operator has two integer A[i].x, A[i].y 
+means that you can change the grid matrix[A[i].x][A[i].y] from sea to island. 
+Return how many island are there in the matrix after each operator.
+
+ Notice
+
+0 is represented as the sea, 1 is represented as the island. If two 1 is adjacent, 
+we consider them in the same island. We only consider up/down/left/right adjacent.
+
+Example
+Given n = 3, m = 3, array of pair A = [(0,0),(0,1),(2,2),(2,1)].
+
+return [1,1,2,2].
+
+解题思路：最开始思考是，是初始化一个m * n的matrix，初始值都是0，每次遍历一个pair将该点的值改为1，island的数目加一，同时检查上下左右四个点的值，
+如果为0，则表示该点没有连接两个component，如果是1，则表示该点连接了两个相邻的component，island数目减一，这样会出现左右上下都已经相连，但是中间
+点没有被标记过，这样进行四次减一的操作，会导致负数的island数目出现，显然这样是不符合常理的。 
+
+参考九章答案，可以将创建两个数组，一个是m * n的matrix，依然是初始化为0，一个是m * n的array，表示每个点的root，初始化为i (x * n + y)，可以讲
+将matrix看作是一个array折成了m行，依然用union find中的root方法。遍历pari时，先将该点改为1并且island数目加一，然后遍历上下左右四个点，
+如果存在且值为1并且与pair中的点root不一致，则island数目减一。
+
+/**
+ * Definition for a point.
+ * class Point {
+ *     int x;
+ *     int y;
+ *     Point() { x = 0; y = 0; }
+ *     Point(int a, int b) { x = a; y = b; }
+ * }
+ */
+public class Solution {
+
+    int[] id;
+     
+    public List<Integer> numIslands2(int m, int n, Point[] operators) {
+        List<Integer> res = new ArrayList<>();
+        if(operators == null || operators.length == 0) return res;
+        id = new int[m * n];
+        for(int i = 0; i < m * n; i++){
+            id[i] = i;
+        }
+        int[][] matrix = new int[m][n];
+        int islands = 0;
+        for(Point point : operators){
+            islands++;
+            int x = point.x, y = point.y;
+            matrix[x][y] = 1;
+            int f = x * n + y;
+            if(x > 0 && matrix[x - 1][y] == 1 && root((x - 1) * n + y) != root(f)){
+                islands--;
+                id[root((x - 1) * n + y)] = f;
+            } 
+            if(x < m - 1 && matrix[x + 1][y] == 1 && root((x + 1) * n + y) != root(f)){
+                islands--;
+                id[root((x + 1) * n + y)] = f;
+            } 
+            if(y > 0 && matrix[x][y - 1] == 1 && root(x * n + y - 1) != root(f)){
+                islands--;
+                id[root(x * n + y - 1)] = f;
+            } 
+            if(y < n - 1 && matrix[x][y + 1] == 1 && root(x * n + y + 1) != root(f)){
+                islands--;
+                id[root(x * n + y + 1)] = f;
+            } 
+            res.add(islands);
+        }
+        return res;
+    }
+    
+    public int root(int i){
+        while(i != id[i]){
+            i = id[i];
+        }
+        return i;
+    }
+}
